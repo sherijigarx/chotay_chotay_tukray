@@ -65,12 +65,11 @@ class AIModelService:
             "OS -v": platform.platform(),
             "CPU ": os.cpu_count(),
             "RAM": f"{psutil.virtual_memory().total / (1024**3):.2f} GB", 
-            # "HotKey": self.wallet.hotkeys.ss58_address
         }
 
         gpus = GPUtil.getGPUs()
         if gpus:
-            system_info["GPU"] = gpus[0].name  # assuming single GPU
+            system_info["GPU"] = gpus[0].name 
 
         # Convert dictionary to list of strings
         tags = [f"{key}: {value}" for key, value in system_info.items()]

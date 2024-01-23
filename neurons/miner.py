@@ -43,6 +43,10 @@ import time
 import sys
 import os
 import wandb
+import platform
+import psutil
+import GPUtil
+import datetime as dt
 
 # Set the project root path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -168,12 +172,28 @@ def main(config):
             f"\nYour miner: {wallet} is not registered to chain connection: {subtensor} \nRun btcli register and try again. "
         )
         exit()
+    
+    def get_system_info():
+        system_info = {
+            "OS -v": platform.platform(),
+            "CPU ": os.cpu_count(),
+            "RAM": f"{psutil.virtual_memory().total / (1024**3):.2f} GB", 
+        }
+
+        gpus = GPUtil.getGPUs()
+        if gpus:
+            system_info["GPU"] = gpus[0].name 
+        # Convert dictionary to list of strings
+        tags = [f"{key}: {value}" for key, value in system_info.items()]
+        tags.append(lib.__version__)
+        return tags
 
     # Each miner gets a unique identity (UID) in the network for differentiation.
     my_subnet_uid = metagraph.hotkeys.index(wallet.hotkey.ss58_address)
     bt.logging.info(f"Running miner on uid: {my_subnet_uid}")
     run_id = dt.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     name = f"Miner-{my_subnet_uid}-{run_id}"
+    sys_info = get_system_info()
 
     if config.use_wandb:
         wandb.init(
@@ -187,8 +207,8 @@ def main(config):
                 "type": "miner",
                 },
                 allow_val_change=True,
+                tags=sys_info
             )
-
 
 ############################### Voice Clone ##########################################
 
