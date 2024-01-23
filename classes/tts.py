@@ -36,6 +36,7 @@ class TextToSpeechService(AIModelService):
         self.last_reset_weights_block = self.current_block
         self.islocaltts = False
         self.p_index = 0
+        self.last_run_date = dt.date.today()
         
         ###################################### DIRECTORY STRUCTURE ###########################################
         self.tts_source_dir = os.path.join(audio_subnet_path, "tts_source")
