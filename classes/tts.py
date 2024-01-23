@@ -66,7 +66,9 @@ class TextToSpeechService(AIModelService):
         current_date = dt.date.today()
         if current_date > self.last_run_date:
             self.last_run_date = current_date
-            self.new_wandb_run()  # Start a new run with reinit=True
+            if self.wandb_run:
+                wandb.finish()  # End the current run
+            self.new_wandb_run()  # Start a new run
 
     def new_wandb_run(self):
         now = dt.datetime.now()
@@ -83,7 +85,6 @@ class TextToSpeechService(AIModelService):
                 "type": "Validator",
             },
             tags=self.sys_info,
-            reinit=True,  # Reinitialize wandb run
             allow_val_change=True,
             anonymous="allow",
         )
