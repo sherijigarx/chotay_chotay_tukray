@@ -15,12 +15,14 @@ from tabulate import tabulate
 import lib.utils
 import lib
 import traceback
+import platform
+import psutil
+import GPUtil
 
 class AIModelService:
     _scores = None
 
     def __init__(self):
-        self.config = self.get_config()
         self.setup_paths()
         self.setup_logging()
         self.setup_wallet()
@@ -28,7 +30,9 @@ class AIModelService:
         self.setup_dendrite()
         self.setup_metagraph()
         self.vcdnp = self.config.vcdnp
+        self.config = self.get_config()
         self.max_mse = self.config.max_mse
+        self.sys_info = self.get_system_info()
         if AIModelService._scores is None:
             AIModelService._scores = torch.zeros_like(self.metagraph.S, dtype=torch.float32)
         self.scores = AIModelService._scores
@@ -45,6 +49,7 @@ class AIModelService:
         parser.add_argument("--hub_key", type=str, default=None, help="Supply the Huggingface Hub API key for prompt dataset")
         parser.add_argument("--vcdnp", type=int, default=10, help="Number of miners to query for each forward call.")
         parser.add_argument("--max_mse", type=float, default=1000.0, help="Maximum Mean Squared Error for Voice cloning.")
+        parser.add_argument("--wandb.logging", type=bool, default="True", help="Set this flag to disable/enable logging to wandb.")
 
         # Add Bittensor specific arguments
         bt.subtensor.add_args(parser)
@@ -54,6 +59,23 @@ class AIModelService:
         # Parse and return the config
         config = bt.config(parser)
         return config
+    
+    def get_system_info(self):
+        system_info = {
+            "OS -v": platform.platform(),
+            "CPU ": os.cpu_count(),
+            "RAM": f"{psutil.virtual_memory().total / (1024**3):.2f} GB", 
+            # "HotKey": self.wallet.hotkeys.ss58_address
+        }
+
+        gpus = GPUtil.getGPUs()
+        if gpus:
+            system_info["GPU"] = gpus[0].name  # assuming single GPU
+
+        # Convert dictionary to list of strings
+        tags = [f"{key}: {value}" for key, value in system_info.items()]
+        tags.append(lib.__version__)
+        return tags
 
     def setup_paths(self):
         # Set the project root path

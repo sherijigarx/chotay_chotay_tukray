@@ -4,12 +4,14 @@ import random
 import sys
 import lib
 import time
+import wandb
 import torch
 import soundfile as sf
 import asyncio
 import traceback
 import torchaudio
 import bittensor as bt
+import datetime as dt
 from tabulate import tabulate
 from datasets import load_dataset
 import lib.protocol
@@ -70,10 +72,38 @@ class VoiceCloningService(AIModelService):
             self.audio_files = [item['audio'] for item in dataset['train']]
             return self.audio_files
 
+    def check_and_update_wandb_run(self):
+        current_date = dt.date.today()
+        if current_date > self.last_run_date:
+            self.last_run_date = current_date
+            self.new_wandb_run()  # Start a new run with reinit=True
+
+    def new_wandb_run(self):
+        now = dt.datetime.now()
+        run_id = now.strftime("%Y-%m-%d_%H-%M-%S")
+        name = f"Validator-{self.uid}-{run_id}"
+        self.wandb_run = wandb.init(
+            name=name,
+            project="subnet16",
+            entity="testingforsubnet16",
+            config={
+                "uid": self.uid,
+                "hotkey": self.wallet.hotkey.ss58_address,
+                "run_name": run_id,
+                "type": "Validator",
+            },
+            tags=self.sys_info,
+            reinit=True,  # Reinitialize wandb run
+            allow_val_change=True,
+            anonymous="allow",
+        )
+        bt.logging.debug(f"Started a new wandb run: {name}")
+
     async def run_async(self):
         step = 0
         running_tasks = []
         while True:
+            self.check_and_update_wandb_run()
             try:
                 new_tasks = await self.main_loop_logic(step)
                 running_tasks.extend(new_tasks)

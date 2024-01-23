@@ -42,6 +42,7 @@ import wave
 import time
 import sys
 import os
+import wandb
 
 # Set the project root path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -72,6 +73,9 @@ def get_config():
     )
     parser.add_argument(
         "--eleven_api", default='' , help="API key to be used for Eleven Labs." 
+    )
+    parser.add_argument(
+    "--use_wandb", default=True , help="Enable logging to Weights & Biases" 
     )
     parser.add_argument("--auto_update", default="yes", help="Auto update")
     # Adds override arguments for network and netuid.
@@ -168,7 +172,22 @@ def main(config):
     # Each miner gets a unique identity (UID) in the network for differentiation.
     my_subnet_uid = metagraph.hotkeys.index(wallet.hotkey.ss58_address)
     bt.logging.info(f"Running miner on uid: {my_subnet_uid}")
+    run_id = dt.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    name = f"Miner-{my_subnet_uid}-{run_id}"
 
+    if config.use_wandb:
+        wandb.init(
+            name=name,
+            project="subnet16", 
+            entity="testingforsubnet16",
+            config={
+                "UID": my_subnet_uid,
+                "hotkey": wallet.hotkey.ss58_address,
+                "run_name": run_id,
+                "type": "miner",
+                },
+                allow_val_change=True,
+            )
 
 
 ############################### Voice Clone ##########################################
@@ -520,6 +539,8 @@ def main(config):
         except KeyboardInterrupt:
             axon.stop()
             bt.logging.success("Miner killed by keyboard interrupt.")
+            wandb.finish()
+            bt.logging.success("Wandb finished.")
             break
         # In case of unforeseen errors, the miner will log the error and continue operations.
         except Exception as e:
