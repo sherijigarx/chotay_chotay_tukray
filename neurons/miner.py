@@ -201,7 +201,7 @@ def main(config):
             project="subnet16", 
             entity="testingforsubnet16",
             config={
-                "UID": my_subnet_uid,
+                "uid": my_subnet_uid,
                 "hotkey": wallet.hotkey.ss58_address,
                 "run_name": run_id,
                 "type": "miner",
