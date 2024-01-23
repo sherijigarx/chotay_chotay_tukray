@@ -23,6 +23,8 @@ class AIModelService:
     _scores = None
 
     def __init__(self):
+        self.config = self.get_config()
+        self.sys_info = self.get_system_info()
         self.setup_paths()
         self.setup_logging()
         self.setup_wallet()
@@ -30,14 +32,12 @@ class AIModelService:
         self.setup_dendrite()
         self.setup_metagraph()
         self.vcdnp = self.config.vcdnp
-        self.config = self.get_config()
         self.max_mse = self.config.max_mse
-        self.sys_info = self.get_system_info()
         if AIModelService._scores is None:
             AIModelService._scores = torch.zeros_like(self.metagraph.S, dtype=torch.float32)
         self.scores = AIModelService._scores
-
-
+        self.uid = self.metagraph.hotkeys.index(self.wallet.hotkey.ss58_address)
+        
     def get_config(self):
         parser = argparse.ArgumentParser()
 
