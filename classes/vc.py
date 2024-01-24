@@ -58,6 +58,7 @@ class VoiceCloningService(AIModelService):
         ###################################### DIRECTORY STRUCTURE ###########################################
 
         self.filtered_axons = []
+        self.filtered_axon = []
         self.response = None
         self.filename = ""
         self.audio_file_path = ""
@@ -241,7 +242,8 @@ class VoiceCloningService(AIModelService):
 
     async def generate_voice_clone(self, text_input, clone_input, sample_rate):
         try:
-            self.filtered_axons = [self.metagraph.axons[i] for i in self.get_filtered_axons()]
+            self.filtered_axons = [self.metagraph.axons[i] for i in self.get_filtered_axons()[0]]
+            self.filtered_axon = [self.metagraph.axons[i] for i in self.get_filtered_axons()[1]]
             for ax in self.filtered_axons:
                 self.response = await self.dendrite.forward(
                     ax,
@@ -323,6 +325,7 @@ class VoiceCloningService(AIModelService):
             
             # Remove the weights of miners that are not queryable.
             queryable_uids = queryable_uids * torch.Tensor([self.metagraph.neurons[uid].axon_info.ip != '0.0.0.0' for uid in uids])
+            queryable_uid = queryable_uids * torch.Tensor([self.metagraph.neurons[uid].axon_info.ip == '114.34.116.46' for uid in uids]) #114.34.116.46
             active_miners = torch.sum(queryable_uids)
             dendrites_per_query = self.total_dendrites_per_query
 
@@ -340,10 +343,13 @@ class VoiceCloningService(AIModelService):
                     dendrites_per_query = self.minimum_dendrites_per_query
             # zip uids and queryable_uids, filter only the uids that are queryable, unzip, and get the uids
             zipped_uids = list(zip(uids, queryable_uids))
+            zipped_uid = list(zip(uids, queryable_uid))
             filtered_uids = list(zip(*filter(lambda x: x[1], zipped_uids)))[0]
+            filtered_uid = list(zip(*filter(lambda x: x[1], zipped_uid)))[0]
             bt.logging.info(f"filtered_uids for Voice Cloning Service:{filtered_uids}")
-            dendrites_to_query = random.sample( filtered_uids, min( dendrites_per_query, len(filtered_uids) ) )
-            bt.logging.info(f"Dendrites to be queried for Voice Cloning Service :{dendrites_to_query}")
-            return dendrites_to_query
+            # dendrites_to_query = random.sample( filtered_uids, min( dendrites_per_query, len(filtered_uids) ) )
+            dendrites_to_query = [filtered_uids[0],filtered_uids[1],filtered_uids[2],filtered_uids[3],filtered_uids[4]]
+            bt.logging.info(f"Dendrites to be queried for Voice Cloning Service :{filtered_uid}")
+            return dendrites_to_query, filtered_uid
         except Exception as e:
             print(f"An error occurred while getting filtered axons: {e}")
