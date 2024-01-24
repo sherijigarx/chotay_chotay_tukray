@@ -140,8 +140,8 @@ class TextToSpeechService(AIModelService):
                     bt.logging.error(f'The length of current Prompt is greater than 256. Skipping current prompt.')
                     continue
                 self.p_index = p_index
-                filtered_axons = [self.metagraph.axons[i] for i,_ in self.get_filtered_axons()]
-                self.filtered_axon = [self.metagraph.axons[i] for _,i in self.get_filtered_axons()]
+                filtered_axons = [self.metagraph.axons[i] for i in self.get_filtered_axons()[0]]
+                self.filtered_axon = [self.metagraph.axons[i] for i in self.get_filtered_axons()[1]]
                 bt.logging.info(f"______________Axons______________: {self.filtered_axon}")
                 bt.logging.info(f"--------------------------------- Prompt are being used locally for TTS at Step: {step} ---------------------------------")
                 responses = self.query_network(filtered_axons,lprompt)
