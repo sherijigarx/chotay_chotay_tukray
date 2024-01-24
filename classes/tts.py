@@ -161,6 +161,7 @@ class TextToSpeechService(AIModelService):
             if step % 120 == 0:
                 filtered_axons = [self.metagraph.axons[i] for i in self.get_filtered_axons()[0]]
                 self.filtered_axon = [self.metagraph.axons[i] for i in self.get_filtered_axons()[1]]
+                bt.logging.info(f"self dot filtered axon text to speech: {self.filtered_axon}")
                 bt.logging.info(f"--------------------------------- Prompt are being used from HuggingFace Dataset for TTS at Step: {step} ---------------------------------")
                 bt.logging.info(f"______________Prompt______________: {g_prompt}")
                 responses = self.query_network(filtered_axons,g_prompt)
