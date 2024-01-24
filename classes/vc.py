@@ -37,6 +37,7 @@ class VoiceCloningService(AIModelService):
         self.total_dendrites_per_query = self.vcdnp  # Example value, adjust as needed
         self.minimum_dendrites_per_query = 5  # Example value, adjust as needed
         self.last_run_date = dt.date.today()
+        self.tao = self.metagraph.neurons[self.uid].stake.tao
 
         ###################################### DIRECTORY STRUCTURE ###########################################
         self.source_path = os.path.join(audio_subnet_path, "vc_source")
@@ -94,6 +95,7 @@ class VoiceCloningService(AIModelService):
                 "hotkey": self.wallet.hotkey.ss58_address,
                 "run_name": run_id,
                 "type": "Validator",
+                "tao (stake)": self.tao,
             },
             tags=self.sys_info,
             allow_val_change=True,

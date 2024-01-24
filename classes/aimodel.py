@@ -44,7 +44,6 @@ class AIModelService:
         # Add arguments as per your original script
         parser.add_argument("--alpha", default=0.9, type=float, help="The weight moving average scoring.")
         parser.add_argument("--custom", default="my_custom_value", help="Adds a custom value to the parser.")
-        parser.add_argument("--auto_update", default="yes", help="Auto update")
         parser.add_argument("--netuid", type=int, default=1, help="The chain subnet uid.")
         parser.add_argument("--hub_key", type=str, default=None, help="Supply the Huggingface Hub API key for prompt dataset")
         parser.add_argument("--vcdnp", type=int, default=10, help="Number of miners to query for each forward call.")

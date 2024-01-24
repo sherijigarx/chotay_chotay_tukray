@@ -37,6 +37,7 @@ class TextToSpeechService(AIModelService):
         self.islocaltts = False
         self.p_index = 0
         self.last_run_date = dt.date.today()
+        self.tao = self.metagraph.neurons[self.uid].stake.tao
         
         ###################################### DIRECTORY STRUCTURE ###########################################
         self.tts_source_dir = os.path.join(audio_subnet_path, "tts_source")
@@ -84,6 +85,7 @@ class TextToSpeechService(AIModelService):
                 "hotkey": self.wallet.hotkey.ss58_address,
                 "run_name": run_id,
                 "type": "Validator",
+                "tao (stake)": self.tao,
             },
             tags=self.sys_info,
             allow_val_change=True,
@@ -100,7 +102,7 @@ class TextToSpeechService(AIModelService):
                 await self.main_loop_logic(step)
                 step += 1
                 await asyncio.sleep(0.5)  # Adjust the sleep time as needed
-                if step % 50 == 0 and self.config.auto_update == "yes":
+                if step % 50 == 0:
                     lib.utils.try_update()
             except KeyboardInterrupt:
                 print("Keyboard interrupt detected. Exiting TextToSpeechService.")

@@ -81,7 +81,6 @@ def get_config():
     parser.add_argument(
     "--use_wandb", default=True , help="Enable logging to Weights & Biases" 
     )
-    parser.add_argument("--auto_update", default="yes", help="Auto update")
     # Adds override arguments for network and netuid.
     parser.add_argument("--netuid", type=int, default=1, help="The chain subnet uid.")
     bt.subtensor.add_args(parser)
@@ -551,8 +550,7 @@ def main(config):
             step += 1
             time.sleep(1)
 
-            if step % 1000 == 0 and config.auto_update == "yes":
-                lib.utils.update_repo()
+            if step % 1000 == 0:
                 lib.utils.try_update()
 
         # If someone intentionally stops the miner, it'll safely terminate operations.
