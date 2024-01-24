@@ -37,7 +37,6 @@ class AIModelService:
             AIModelService._scores = torch.zeros_like(self.metagraph.S, dtype=torch.float32)
         self.scores = AIModelService._scores
         self.uid = self.metagraph.hotkeys.index(self.wallet.hotkey.ss58_address)
-        self.tao = self.metagraph.neurons[self.uid].stake.tao
         
     def get_config(self):
         parser = argparse.ArgumentParser()
@@ -71,9 +70,11 @@ class AIModelService:
         if gpus:
             system_info["GPU"] = gpus[0].name 
 
+        tao = self.metagraph.neurons[self.uid].stake.tao
+
         # Convert dictionary to list of strings
         tags = [f"{key}: {value}" for key, value in system_info.items()]
-        tags.append(lib.__version__, self.tao)
+        tags.append(lib.__version__, tao)
         return tags
 
     def setup_paths(self):
