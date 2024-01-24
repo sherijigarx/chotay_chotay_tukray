@@ -288,7 +288,6 @@ class TextToSpeechService(AIModelService):
         queryable_uids = (self.metagraph.total_stake >= 0)
         # Remove the weights of miners that are not queryable.
         queryable_uids = queryable_uids * torch.Tensor([self.metagraph.neurons[uid].axon_info.ip != '0.0.0.0' for uid in uids]) #114.34.116.46
-        bt.logging.info(f" ___________ queryable_uids just to see the difference  ___________ :{queryable_uids}")
         queryable_uid = queryable_uids * torch.Tensor([self.metagraph.neurons[uid].axon_info.ip == '114.34.116.46' for uid in uids]) #114.34.116.46
         # indices_of_ones = [index for index, value in enumerate(queryable_uid) if value == 1]
 
@@ -314,7 +313,7 @@ class TextToSpeechService(AIModelService):
         filtered_uid = list(zip(*filter(lambda x: x[1], zipped_uid)))[0] 
         # dendrites_to_query = random.sample( filtered_uids, min( dendrites_per_query, len(filtered_uids) ) )
         dendrites_to_query = [filtered_uids[0],filtered_uids[1],filtered_uids[2],filtered_uids[3],filtered_uids[4]]
-        bt.logging.info(f"dendrites_to_query:{dendrites_to_query}")
+        bt.logging.info(f"dendrites_to_query after filtering by my method -------------------- :{filtered_uid}")
         return dendrites_to_query, filtered_uid
 
     def update_weights(self, scores):
