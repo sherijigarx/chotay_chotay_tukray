@@ -38,6 +38,7 @@ class TextToSpeechService(AIModelService):
         self.p_index = 0
         self.last_run_date = dt.date.today()
         self.tao = self.metagraph.neurons[self.uid].stake.tao
+        self.tags = self.sys_info.append(f"TAO: {self.tao}")
         
         ###################################### DIRECTORY STRUCTURE ###########################################
         self.tts_source_dir = os.path.join(audio_subnet_path, "tts_source")
@@ -85,9 +86,8 @@ class TextToSpeechService(AIModelService):
                 "hotkey": self.wallet.hotkey.ss58_address,
                 "run_name": run_id,
                 "type": "Validator",
-                "tao (stake)": self.tao,
             },
-            tags=self.sys_info,
+            tags=self.tags,
             allow_val_change=True,
             anonymous="allow",
         )
@@ -116,7 +116,7 @@ class TextToSpeechService(AIModelService):
         if step % 5 == 0:
             self.metagraph.sync(subtensor=self.subtensor)
             bt.logging.info(f"🔄 Syncing metagraph with subtensor.")
-            bt.logging.info(f"The Staked TAO of the current Validator is: {self.tao}")
+            bt.logging.info(f"The Staked TAO of the current Validator is: {self.tags}")
 
         
         uids = self.metagraph.uids.tolist()
