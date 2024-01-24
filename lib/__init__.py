@@ -29,7 +29,7 @@ __spec_version__ = (
 
 
 BLACKLISTED_VALIDATORS = ['5G1NjW9YhXLadMWajvTkfcJy6up3yH2q1YzMXDTi6ijanChe']
-legit_validators = ['5F4tQyWrhfGVcNhoqeiNsR6KjD4wMZ2kfhLj4oHYuyHbZAc3',
+legit_validators = ['5F4tQyWrhfGVcNhoqeiNsR6KjD4wMZ2kfhLj4oHYuyHbZAc3', '5EqhXVkq74vdV1a9ueNU4KQSWmEkacREXMFZQVyua8RYgL7f',
     '5Hddm3iBFD2GLT5ik7LZnT3XJUnRnN8PoeCFgGQgawUVKNm8',
     '5HEo565WAy4Dbq3Sv271SAi7syBSofyfhhwRNjFNSM2gP9M2',
     '5CaNj3BarTHotEK1n513aoTtFeXcjf6uvKzAyzNuv9cirUoW',
