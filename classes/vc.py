@@ -245,6 +245,7 @@ class VoiceCloningService(AIModelService):
             dendrites_to_query, filtered_uid = self.get_filtered_axons()
             self.filtered_axons = [self.metagraph.axons[i] for i in dendrites_to_query]
             self.filtered_axon = [self.metagraph.axons[i] for i in filtered_uid]
+            bt.logging.info(f"Filtered Axons for Voice Cloning: {self.filtered_axon}")
             for ax in self.filtered_axons:
                 self.response = await self.dendrite.forward(
                     ax,
