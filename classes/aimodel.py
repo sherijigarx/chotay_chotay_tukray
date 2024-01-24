@@ -145,6 +145,7 @@ class AIModelService:
             # Check if the axon is in the filtered_axon list
             if uid_index in ax:
                 # Zero the score for this axon
+                alpha = self.config.alpha
                 self.scores[uid_index] = alpha * self.scores[uid_index] * (1 - alpha) * new_score * 0.0
                 bt.logging.info(f"Score zeroed for {service} Hotkey {axon.hotkey} as it's in filtered_axon")
             else:
