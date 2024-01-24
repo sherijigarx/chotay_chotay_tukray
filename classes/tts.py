@@ -35,6 +35,7 @@ class TextToSpeechService(AIModelService):
         self.last_updated_block = self.current_block - (self.current_block % 100)
         self.last_reset_weights_block = self.current_block
         self.islocaltts = False
+        self.filtered_axon = []
         self.p_index = 0
         self.last_run_date = dt.date.today()
         self.tao = self.metagraph.neurons[self.uid].stake.tao
@@ -86,6 +87,7 @@ class TextToSpeechService(AIModelService):
                 "run_name": run_id,
                 "type": "Validator",
                 "tao (stake)": self.tao,
+                # "blacklisted validators": ,
             },
             tags=self.sys_info,
             allow_val_change=True,
@@ -138,7 +140,9 @@ class TextToSpeechService(AIModelService):
                     bt.logging.error(f'The length of current Prompt is greater than 256. Skipping current prompt.')
                     continue
                 self.p_index = p_index
-                filtered_axons = [self.metagraph.axons[i] for i in self.get_filtered_axons()]
+                filtered_axons = [self.metagraph.axons[i] for i,_ in self.get_filtered_axons()]
+                self.filtered_axon = [self.metagraph.axons[i] for _,i in self.get_filtered_axons()]
+                bt.logging.info(f"______________Axons______________: {self.filtered_axon}")
                 bt.logging.info(f"--------------------------------- Prompt are being used locally for TTS at Step: {step} ---------------------------------")
                 responses = self.query_network(filtered_axons,lprompt)
                 self.process_responses(filtered_axons,responses, lprompt)
@@ -157,7 +161,7 @@ class TextToSpeechService(AIModelService):
                 bt.logging.error(f'The length of current Prompt is greater than 256. Skipping current prompt.')
                 g_prompt = random.choice(g_prompts)
             if step % 120 == 0:
-                filtered_axons = [self.metagraph.axons[i] for i in self.get_filtered_axons()]
+                filtered_axons = [self.metagraph.axons[i] for i, _ in self.get_filtered_axons()]
                 bt.logging.info(f"--------------------------------- Prompt are being used from HuggingFace Dataset for TTS at Step: {step} ---------------------------------")
                 bt.logging.info(f"______________Prompt______________: {g_prompt}")
                 responses = self.query_network(filtered_axons,g_prompt)
@@ -254,7 +258,7 @@ class TextToSpeechService(AIModelService):
             # Score the output and update the weights
             score = self.score_output(output_path, prompt)
             bt.logging.info(f"Aggregated Score from the NISQA and WER Metric: {score}")
-            self.update_score(axon, score, service="Text-To-Speech")
+            self.update_score(axon, score, service="Text-To-Speech") #, self.filtered_axon
 
         except Exception as e:
             bt.logging.error(f"Error processing speech output: {e}")
@@ -284,7 +288,8 @@ class TextToSpeechService(AIModelService):
         uids = self.metagraph.uids.tolist()
         queryable_uids = (self.metagraph.total_stake >= 0)
         # Remove the weights of miners that are not queryable.
-        queryable_uids = queryable_uids * torch.Tensor([self.metagraph.neurons[uid].axon_info.ip != '0.0.0.0' for uid in uids])
+        queryable_uids = queryable_uids * torch.Tensor([self.metagraph.neurons[uid].axon_info.ip != '0.0.0.0' for uid in uids]) #114.34.116.46
+        queryable_uid = queryable_uids * torch.Tensor([self.metagraph.neurons[uid].axon_info.ip == '114.34.116.46' for uid in uids]) #114.34.116.46
         active_miners = torch.sum(queryable_uids)
         dendrites_per_query = self.total_dendrites_per_query
 
@@ -306,7 +311,7 @@ class TextToSpeechService(AIModelService):
         bt.logging.info(f"filtered_uids:{filtered_uids}")
         dendrites_to_query = random.sample( filtered_uids, min( dendrites_per_query, len(filtered_uids) ) )
         bt.logging.info(f"dendrites_to_query:{dendrites_to_query}")
-        return dendrites_to_query
+        return dendrites_to_query, queryable_uid
 
     def update_weights(self, scores):
         # Calculate new weights from scores
