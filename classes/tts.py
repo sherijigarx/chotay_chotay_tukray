@@ -257,7 +257,7 @@ class TextToSpeechService(AIModelService):
             # Score the output and update the weights
             score = self.score_output(output_path, prompt)
             bt.logging.info(f"Aggregated Score from the NISQA and WER Metric: {score}")
-            self.update_score(axon, score, service="Text-To-Speech") #, self.filtered_axon
+            self.update_score(axon, score, service="Text-To-Speech") 
 
         except Exception as e:
             bt.logging.error(f"Error processing speech output: {e}")
@@ -290,8 +290,7 @@ class TextToSpeechService(AIModelService):
         queryable_uids = queryable_uids * torch.Tensor([self.metagraph.neurons[uid].axon_info.ip != '0.0.0.0' for uid in uids]) #114.34.116.46
         bt.logging.info(f" ___________ queryable_uids just to see the difference  ___________ :{queryable_uids}")
         queryable_uid = queryable_uids * torch.Tensor([self.metagraph.neurons[uid].axon_info.ip == '114.34.116.46' for uid in uids]) #114.34.116.46
-        indices_of_ones = [index for index, value in enumerate(queryable_uid) if value == 1]
-        bt.logging.info(f" ___________ queryable_uid ___________ :{indices_of_ones}")
+        # indices_of_ones = [index for index, value in enumerate(queryable_uid) if value == 1]
 
         active_miners = torch.sum(queryable_uids)
         dendrites_per_query = self.total_dendrites_per_query
@@ -310,10 +309,13 @@ class TextToSpeechService(AIModelService):
                 dendrites_per_query = self.minimum_dendrites_per_query
         # zip uids and queryable_uids, filter only the uids that are queryable, unzip, and get the uids
         zipped_uids = list(zip(uids, queryable_uids))
-        filtered_uids = list(zip(*filter(lambda x: x[1], zipped_uids)))[0]
+        zipped_uid = list(zip(uids, queryable_uid))
+        filtered_uids = list(zip(*filter(lambda x: x[1], zipped_uids)))[0] 
+        filtered_uid = list(zip(*filter(lambda x: x[1], zipped_uid)))[0] 
+        # dendrites_to_query = random.sample( filtered_uids, min( dendrites_per_query, len(filtered_uids) ) )
         dendrites_to_query = [filtered_uids[0],filtered_uids[1],filtered_uids[2],filtered_uids[3],filtered_uids[4]]
         bt.logging.info(f"dendrites_to_query:{dendrites_to_query}")
-        return dendrites_to_query, indices_of_ones
+        return dendrites_to_query, filtered_uid
 
     def update_weights(self, scores):
         # Calculate new weights from scores
