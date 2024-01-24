@@ -116,6 +116,8 @@ class TextToSpeechService(AIModelService):
         if step % 5 == 0:
             self.metagraph.sync(subtensor=self.subtensor)
             bt.logging.info(f"🔄 Syncing metagraph with subtensor.")
+            bt.logging.info(f"The Staked TAO of the current Validator is: {self.tao}")
+
         
         uids = self.metagraph.uids.tolist()
         # If there are more uids than scores, add more weights.
