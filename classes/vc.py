@@ -95,6 +95,7 @@ class VoiceCloningService(AIModelService):
                 "hotkey": self.wallet.hotkey.ss58_address,
                 "run_name": run_id,
                 "type": "Validator",
+                "tao (stake)": self.tao,
             },
             tags=self.sys_info,
             allow_val_change=True,
