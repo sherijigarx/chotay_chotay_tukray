@@ -125,14 +125,14 @@ class AIModelService:
         self.metagraph = self.subtensor.metagraph(self.config.netuid)
         bt.logging.info(f"Metagraph: {self.metagraph}")
 
-    def update_score(self, axon, new_score, service, ax):
+    def update_score(self, axon, new_score, service):
         try:
             uids = self.metagraph.uids.tolist()
             zipped_uids = list(zip(uids, self.metagraph.axons))
             uid_index = list(zip(*filter(lambda x: x[1] == axon, zipped_uids)))[0][0]
             alpha = self.config.alpha
             self.scores[uid_index] = alpha * self.scores[uid_index] + (1 - alpha) * new_score
-            
+            # self.scores[]
             bt.logging.info(f"Updated score for {service} Hotkey {axon.hotkey}: {self.scores[uid_index]}")
         except Exception as e:
             print(f"An error occurred while updating the score: {e}")
