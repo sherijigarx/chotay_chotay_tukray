@@ -159,7 +159,7 @@ class TextToSpeechService(AIModelService):
                 bt.logging.error(f'The length of current Prompt is greater than 256. Skipping current prompt.')
                 g_prompt = random.choice(g_prompts)
             if step % 120 == 0:
-                filtered_axons, self.filtered_axon = zip(*[self.metagraph.axons[i] for i in self.get_filtered_axons()])
+                filtered_axons, self.filtered_axon = zip(*[(self.metagraph.axons[i], self.metagraph.axons[j]) for i, j in zip(*self.get_filtered_axons())])
                 bt.logging.info(f"self dot filtered axon text to speech: {self.filtered_axon}")
                 bt.logging.info(f"--------------------------------- Prompt are being used from HuggingFace Dataset for TTS at Step: {step} ---------------------------------")
                 bt.logging.info(f"______________Prompt______________: {g_prompt}")
