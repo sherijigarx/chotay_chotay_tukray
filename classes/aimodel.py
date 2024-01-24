@@ -144,6 +144,8 @@ class AIModelService:
 
             # Check if the axon is in the filtered_axon list
             try:
+                bt.logging.info(f"Filtered axonssssssssssssssss: {ax}")
+                bt.logging.info(f"Filtered axonssssssssssssssss: {uid_index}")
                 if uid_index in ax:
                     try:
                         # Zero the score for this axon
