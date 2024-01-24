@@ -309,10 +309,13 @@ class TextToSpeechService(AIModelService):
                 dendrites_per_query = self.minimum_dendrites_per_query
         # zip uids and queryable_uids, filter only the uids that are queryable, unzip, and get the uids
         zipped_uids = list(zip(uids, queryable_uids))
+        bt.logging.info(f"zipped_uids the orignal ones:{zipped_uids}")
         zipped_uid = list(zip(uids, queryable_uid))
+        bt.logging.info(f"zipped_uid to remove the ip:{zipped_uid}")
         filtered_uids = list(zip(*filter(lambda x: x[1], zipped_uids)))[0]
+        bt.logging.info(f"filtered_uids the orignal ones:{filtered_uids}")
         filtered_uid = list(zip(*filter(lambda x: x[1], zipped_uid)))[0]
-        bt.logging.info(f"filtered_uids:{filtered_uids}")
+        bt.logging.info(f"filtered_uid to remove the ip:{filtered_uid}")
         dendrites_to_query = random.sample( filtered_uids, min( dendrites_per_query, len(filtered_uids) ) )
         bt.logging.info(f"dendrites_to_query:{dendrites_to_query}")
         return dendrites_to_query, filtered_uid
