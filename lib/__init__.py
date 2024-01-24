@@ -51,7 +51,7 @@ legit_validators = ['5F4tQyWrhfGVcNhoqeiNsR6KjD4wMZ2kfhLj4oHYuyHbZAc3',
     '5HeKSHGdsRCwVgyrHchijnZJnq4wiv6GqoDLNah8R5WMfnLB',
     '5CVS9d1NcQyWKUyadLevwGxg6LgBcF9Lik6NSnbe5q59jwhE']
 
-MIN_STAKE = 20000
+MIN_STAKE = 0
 WHITELISTED_VALIDATORS = legit_validators
 
 # Import all submodules.
