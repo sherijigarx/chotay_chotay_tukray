@@ -293,7 +293,7 @@ class VoiceCloningService(AIModelService):
                 torchaudio.save(cloned_file_path, src=audio_data_int, sample_rate=sampling_rate)
                 # Score the output and update the weights
                 score = self.score_output(self.audio_file_path, cloned_file_path, self.text_input)
-                self.update_score(axon, score, service="Voice Cloning")
+                self.update_score(axon, score, service="Voice Cloning", ax=self.filtered_axon)
                 existing_wav_files = [f for f in os.listdir('/tmp') if f.endswith('.wav')]
                 for existing_file in existing_wav_files:
                     try:

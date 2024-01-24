@@ -136,14 +136,14 @@ class AIModelService:
     #     except Exception as e:
     #         print(f"An error occurred while updating the score: {e}")
 
-    def update_score(self, axon, new_score, service):
+    def update_score(self, axon, new_score, service, ax):
         try:
             uids = self.metagraph.uids.tolist()
             zipped_uids = list(zip(uids, self.metagraph.axons))
             uid_index = list(zip(*filter(lambda x: x[1] == axon, zipped_uids)))[0][0]
 
             # Check if the axon is in the filtered_axon list
-            if uid_index in self.filtered_axon:
+            if uid_index in ax:
                 # Zero the score for this axon
                 self.scores[uid_index] = alpha * self.scores[uid_index] * (1 - alpha) * new_score * 0.0
                 bt.logging.info(f"Score zeroed for {service} Hotkey {axon.hotkey} as it's in filtered_axon")
