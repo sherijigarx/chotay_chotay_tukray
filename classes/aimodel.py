@@ -143,17 +143,26 @@ class AIModelService:
             uid_index = list(zip(*filter(lambda x: x[1] == axon, zipped_uids)))[0][0]
 
             # Check if the axon is in the filtered_axon list
-            if uid_index in ax:
-                # Zero the score for this axon
-                alpha = self.config.alpha
-                self.scores[uid_index] = alpha * self.scores[uid_index] * (1 - alpha) * new_score * 0.0
-                bt.logging.info(f"Score zeroed for {service} Hotkey {axon.hotkey} as it's in filtered_axon")
-            else:
-                alpha = self.config.alpha
-                self.scores[uid_index] = alpha * self.scores[uid_index] + (1 - alpha) * new_score
-                bt.logging.info(f"Updated score for {service} Hotkey {axon.hotkey}: {self.scores[uid_index]}")
+            try:
+                if uid_index in ax:
+                    try:
+                        # Zero the score for this axon
+                        alpha = self.config.alpha
+                        self.scores[uid_index] = alpha * self.scores[uid_index] * (1 - alpha) * new_score * 0.0
+                        bt.logging.info(f"Score zeroed for {service} Hotkey {axon.hotkey} as it's in filtered_axon")
+                    except Exception as e:
+                        print(f"aa mill sajnaaa faryaadaan nay: {e}")
+                else:
+                    try:
+                        alpha = self.config.alpha
+                        self.scores[uid_index] = alpha * self.scores[uid_index] + (1 - alpha) * new_score
+                        bt.logging.info(f"Updated score for {service} Hotkey {axon.hotkey}: {self.scores[uid_index]}")
+                    except Exception as e:
+                        print(f"teri meharbani aa else de vech ee koi panga paa de: {e}")
+            except Exception as e:
+                print(f"puray de puray function de bhains ki ding dong: {e}")
         except Exception as e:
-            print(f"An error occurred while updating the score: {e}")
+            print(f"An error occurred while updating the score hassay kho le ne teriya yadan ne: {e}")
 
 
     def punish(self, axon, service, punish_message):
