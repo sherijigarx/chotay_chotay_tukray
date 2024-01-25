@@ -159,10 +159,7 @@ class TextToSpeechService(AIModelService):
                 bt.logging.error(f'The length of current Prompt is greater than 256. Skipping current prompt.')
                 g_prompt = random.choice(g_prompts)
             if step % 120 == 0:
-                filtered_axons, self.filtered_axon = self.get_filtered_axons()
-                filtered_axons = [self.metagraph.axons[i] for i in filtered_axons]
-                self.filtered_axon = [self.metagraph.axons[i] for i in self.filtered_axon]
-                bt.logging.info(f"self dot filtered axon text to speech: {self.filtered_axon}")
+                filtered_axons = [self.metagraph.axons[i] for i in self.get_filtered_axons()]
                 bt.logging.info(f"--------------------------------- Prompt are being used from HuggingFace Dataset for TTS at Step: {step} ---------------------------------")
                 bt.logging.info(f"______________Prompt______________: {g_prompt}")
                 responses = self.query_network(filtered_axons,g_prompt)
@@ -315,8 +312,9 @@ class TextToSpeechService(AIModelService):
         filtered_uid = list(zip(*filter(lambda x: x[1], zipped_uid)))[0] 
         # dendrites_to_query = random.sample( filtered_uids, min( dendrites_per_query, len(filtered_uids) ) )
         dendrites_to_query = [filtered_uids[0],filtered_uids[1],filtered_uids[2],filtered_uids[3],filtered_uids[4]]
-        bt.logging.info(f"dendrites_to_query after filtering by my method -------------------- :{filtered_uid}")
-        return dendrites_to_query, filtered_uid
+        self.filtered_axon = filtered_uid
+        bt.logging.info(f"dendrites_to_query after filtering by my method -------------------- :{self.filtered_axon}")
+        return dendrites_to_query
 
     def update_weights(self, scores):
         # Calculate new weights from scores

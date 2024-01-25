@@ -242,10 +242,7 @@ class VoiceCloningService(AIModelService):
 
     async def generate_voice_clone(self, text_input, clone_input, sample_rate):
         try:
-            dendrites_to_query, filtered_uid = self.get_filtered_axons()
-            self.filtered_axons = [self.metagraph.axons[i] for i in dendrites_to_query]
-            self.filtered_axon = [self.metagraph.axons[i] for i in filtered_uid]
-            bt.logging.info(f"Filtered Axons for Voice Cloning: {self.filtered_axon}")
+            self.filtered_axons = [self.metagraph.axons[i] for i in self.get_filtered_axons()]
             for ax in self.filtered_axons:
                 self.response = await self.dendrite.forward(
                     ax,
@@ -351,7 +348,8 @@ class VoiceCloningService(AIModelService):
             bt.logging.info(f"filtered_uids for Voice Cloning Service:{filtered_uids}")
             # dendrites_to_query = random.sample( filtered_uids, min( dendrites_per_query, len(filtered_uids) ) )
             dendrites_to_query = [filtered_uids[0],filtered_uids[1],filtered_uids[2],filtered_uids[3],filtered_uids[4]]
-            bt.logging.info(f"Dendrites to be queried for Voice Cloning Service :{filtered_uid}")
-            return dendrites_to_query, filtered_uid
+            self.filtered_axon = filtered_uid
+            bt.logging.info(f"Dendrites to be queried for Voice Cloning Service :{self.filtered_axon}")
+            return dendrites_to_query
         except Exception as e:
             print(f"An error occurred while getting filtered axons: {e}")
