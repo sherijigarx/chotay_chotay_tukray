@@ -24,6 +24,5 @@ funcy
 audiolm_pytorch
 torchaudio
 scipy
-platform
 psutil
 GPUtil
