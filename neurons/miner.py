@@ -78,9 +78,6 @@ def get_config():
     parser.add_argument(
         "--eleven_api", default='' , help="API key to be used for Eleven Labs." 
     )
-    parser.add_argument(
-    "--use_wandb", default=True , help="Enable logging to Weights & Biases" 
-    )
     # Adds override arguments for network and netuid.
     parser.add_argument("--netuid", type=int, default=1, help="The chain subnet uid.")
     bt.subtensor.add_args(parser)
@@ -187,6 +184,7 @@ def main(config):
         tags.append(lib.__version__)
         return tags
 
+    use_wandb = True
     # Each miner gets a unique identity (UID) in the network for differentiation.
     my_subnet_uid = metagraph.hotkeys.index(wallet.hotkey.ss58_address)
     bt.logging.info(f"Running miner on uid: {my_subnet_uid}")
@@ -194,11 +192,11 @@ def main(config):
     name = f"Miner-{my_subnet_uid}-{run_id}"
     sys_info = get_system_info()
 
-    if config.use_wandb:
+    if use_wandb:
         wandb.init(
             name=name,
-            project="subnet16", 
-            entity="testingforsubnet16",
+            project="AudioSubnet_Miner", 
+            entity="subnet16team",
             config={
                 "uid": my_subnet_uid,
                 "hotkey": wallet.hotkey.ss58_address,

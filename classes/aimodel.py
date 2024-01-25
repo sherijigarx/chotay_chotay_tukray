@@ -37,18 +37,17 @@ class AIModelService:
             AIModelService._scores = torch.zeros_like(self.metagraph.S, dtype=torch.float32)
         self.scores = AIModelService._scores
         self.uid = self.metagraph.hotkeys.index(self.wallet.hotkey.ss58_address)
-        
+
     def get_config(self):
         parser = argparse.ArgumentParser()
 
         # Add arguments as per your original script
         parser.add_argument("--alpha", default=0.9, type=float, help="The weight moving average scoring.")
         parser.add_argument("--custom", default="my_custom_value", help="Adds a custom value to the parser.")
-        parser.add_argument("--netuid", type=int, default=1, help="The chain subnet uid.")
+        parser.add_argument("--netuid", type=int, default=16, help="The chain subnet uid.")
         parser.add_argument("--hub_key", type=str, default=None, help="Supply the Huggingface Hub API key for prompt dataset")
         parser.add_argument("--vcdnp", type=int, default=10, help="Number of miners to query for each forward call.")
         parser.add_argument("--max_mse", type=float, default=1000.0, help="Maximum Mean Squared Error for Voice cloning.")
-        parser.add_argument("--wandb.logging", type=bool, default="True", help="Set this flag to disable/enable logging to wandb.")
 
         # Add Bittensor specific arguments
         bt.subtensor.add_args(parser)
@@ -58,7 +57,7 @@ class AIModelService:
         # Parse and return the config
         config = bt.config(parser)
         return config
-    
+
     def get_system_info(self):
         system_info = {
             "OS -v": platform.platform(),
@@ -125,46 +124,21 @@ class AIModelService:
         self.metagraph = self.subtensor.metagraph(self.config.netuid)
         bt.logging.info(f"Metagraph: {self.metagraph}")
 
-    # def update_score(self, axon, new_score, service):
-    #     try:
-    #         uids = self.metagraph.uids.tolist()
-    #         zipped_uids = list(zip(uids, self.metagraph.axons))
-    #         uid_index = list(zip(*filter(lambda x: x[1] == axon, zipped_uids)))[0][0]
-    #         alpha = self.config.alpha
-    #         self.scores[uid_index] = alpha * self.scores[uid_index] + (1 - alpha) * new_score
-    #         bt.logging.info(f"Updated score for {service} Hotkey {axon.hotkey}: {self.scores[uid_index]}")
-    #     except Exception as e:
-    #         print(f"An error occurred while updating the score: {e}")
-
     def update_score(self, axon, new_score, service, ax):
-        try:
-            uids = self.metagraph.uids.tolist()
-            zipped_uids = list(zip(uids, self.metagraph.axons))
-            uid_index = list(zip(*filter(lambda x: x[1] == axon, zipped_uids)))[0][0]
-
-            # Check if the axon is in the filtered_axon list
             try:
-                bt.logging.info(f"Filtered axonssssssssssssssss: {ax}")
-                bt.logging.info(f"Filtered axonssssssssssssssss: {uid_index}")
+                uids = self.metagraph.uids.tolist()
+                zipped_uids = list(zip(uids, self.metagraph.axons))
+                uid_index = list(zip(*filter(lambda x: x[1] == axon, zipped_uids)))[0][0]
                 if uid_index in ax:
-                    try:
-                        # Zero the score for this axon
-                        alpha = self.config.alpha
-                        self.scores[uid_index] = alpha * self.scores[uid_index] * (1 - alpha) * new_score * 0.0
-                        bt.logging.info(f"Score zeroed for {service} Hotkey {axon.hotkey} as it's in filtered_axon")
-                    except Exception as e:
-                        print(f"aa mill sajnaaa faryaadaan nay: {e}")
+                    alpha = self.config.alpha
+                    self.scores[uid_index] = alpha * self.scores[uid_index] * (1 - alpha) * new_score * 0.0
+
                 else:
-                    try:
-                        alpha = self.config.alpha
-                        self.scores[uid_index] = alpha * self.scores[uid_index] + (1 - alpha) * new_score
-                        bt.logging.info(f"Updated score for {service} Hotkey {axon.hotkey}: {self.scores[uid_index]}")
-                    except Exception as e:
-                        print(f"teri meharbani aa else de vech ee koi panga paa de: {e}")
+                    alpha = self.config.alpha
+                    self.scores[uid_index] = alpha * self.scores[uid_index] + (1 - alpha) * new_score
+                    bt.logging.info(f"Updated score for {service} Hotkey {axon.hotkey}: {self.scores[uid_index]}")
             except Exception as e:
-                print(f"puray de puray function de bhains ki ding dong: {e}")
-        except Exception as e:
-            print(f"An error occurred while updating the score hassay kho le ne teriya yadan ne: {e}")
+                print(f"An error occurred while updating the score: {e}")
 
 
     def punish(self, axon, service, punish_message):

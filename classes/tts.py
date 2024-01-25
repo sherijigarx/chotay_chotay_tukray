@@ -32,10 +32,10 @@ class TextToSpeechService(AIModelService):
         self.total_dendrites_per_query = 25  # 25
         self.minimum_dendrites_per_query = 3  # Example value, adjust as needed
         self.current_block = self.subtensor.block
+        self.filtered_axon = []
         self.last_updated_block = self.current_block - (self.current_block % 100)
         self.last_reset_weights_block = self.current_block
         self.islocaltts = False
-        self.filtered_axon = []
         self.p_index = 0
         self.last_run_date = dt.date.today()
         self.tao = self.metagraph.neurons[self.uid].stake.tao
@@ -64,7 +64,7 @@ class TextToSpeechService(AIModelService):
             self.local_prompts = self.local_prompts[0].values.tolist()
             bt.logging.info(f"Loaded prompts from {self.tts_source_dir}")
             os.remove(os.path.join(self.tts_source_dir, 'tts_prompts.csv'))
-
+        
     def check_and_update_wandb_run(self):
         current_date = dt.date.today()
         if current_date > self.last_run_date:
@@ -79,15 +79,14 @@ class TextToSpeechService(AIModelService):
         name = f"Validator-{self.uid}-{run_id}"
         self.wandb_run = wandb.init(
             name=name,
-            project="subnet16",
-            entity="testingforsubnet16",
+            project="AudioSubnet_Valid",
+            entity="subnet16team",
             config={
                 "uid": self.uid,
                 "hotkey": self.wallet.hotkey.ss58_address,
                 "run_name": run_id,
                 "type": "Validator",
                 "tao (stake)": self.tao,
-                # "blacklisted validators": ,
             },
             tags=self.sys_info,
             allow_val_change=True,
@@ -140,7 +139,7 @@ class TextToSpeechService(AIModelService):
                     bt.logging.error(f'The length of current Prompt is greater than 256. Skipping current prompt.')
                     continue
                 self.p_index = p_index
-                filtered_axons = [self.metagraph.axons[i] for i in self.get_filtered_axons()[0]]
+                filtered_axons = [self.metagraph.axons[i] for i in self.get_filtered_axons()]
                 bt.logging.info(f"--------------------------------- Prompt are being used locally for TTS at Step: {step} ---------------------------------")
                 responses = self.query_network(filtered_axons,lprompt)
                 self.process_responses(filtered_axons,responses, lprompt)
@@ -178,7 +177,7 @@ class TextToSpeechService(AIModelService):
             filtered_axons,
             lib.protocol.TextToSpeech(roles=["user"], text_input=prompt),
             deserialize=True,
-            timeout=120,
+            timeout=60,
         )
         return responses
     
@@ -256,7 +255,7 @@ class TextToSpeechService(AIModelService):
             # Score the output and update the weights
             score = self.score_output(output_path, prompt)
             bt.logging.info(f"Aggregated Score from the NISQA and WER Metric: {score}")
-            self.update_score(axon, score, service="Text-To-Speech", ax=self.filtered_axon) 
+            self.update_score(axon, score, service="Text-To-Speech", ax=self.filtered_axon)
 
         except Exception as e:
             bt.logging.error(f"Error processing speech output: {e}")
@@ -286,10 +285,8 @@ class TextToSpeechService(AIModelService):
         uids = self.metagraph.uids.tolist()
         queryable_uids = (self.metagraph.total_stake >= 0)
         # Remove the weights of miners that are not queryable.
-        queryable_uids = queryable_uids * torch.Tensor([self.metagraph.neurons[uid].axon_info.ip != '0.0.0.0' for uid in uids]) 
-        queryable_uid = queryable_uids * torch.Tensor([self.metagraph.neurons[uid].axon_info.ip == '114.34.116.46' for uid in uids]) 
-        # indices_of_ones = [index for index, value in enumerate(queryable_uid) if value == 1]
-
+        queryable_uids = queryable_uids * torch.Tensor([self.metagraph.neurons[uid].axon_info.ip != '0.0.0.0' for uid in uids])
+        queryable_uid = queryable_uids * torch.Tensor([any(self.metagraph.neurons[uid].axon_info.ip.startswith(prefix) for prefix in ['64.247.206.', '89.187.159.','38.147.83.'])for uid in uids])
         active_miners = torch.sum(queryable_uids)
         dendrites_per_query = self.total_dendrites_per_query
 
@@ -308,12 +305,12 @@ class TextToSpeechService(AIModelService):
         # zip uids and queryable_uids, filter only the uids that are queryable, unzip, and get the uids
         zipped_uids = list(zip(uids, queryable_uids))
         zipped_uid = list(zip(uids, queryable_uid))
-        filtered_uids = list(zip(*filter(lambda x: x[1], zipped_uids)))[0] 
-        filtered_uid = list(zip(*filter(lambda x: x[1], zipped_uid)))[0] 
-        # dendrites_to_query = random.sample( filtered_uids, min( dendrites_per_query, len(filtered_uids) ) )
-        dendrites_to_query = [filtered_uids[0],filtered_uids[1],filtered_uids[2],filtered_uids[3],filtered_uids[4]]
+        filtered_uids = list(zip(*filter(lambda x: x[1], zipped_uids)))[0]
+        filtered_uid = list(zip(*filter(lambda x: x[1], zipped_uid)))[0]
         self.filtered_axon = filtered_uid
-        bt.logging.info(f"dendrites_to_query after filtering by my method -------------------- :{self.filtered_axon}")
+        bt.logging.info(f"filtered_uids:{filtered_uids}")
+        dendrites_to_query = random.sample( filtered_uids, min( dendrites_per_query, len(filtered_uids) ) )
+        bt.logging.info(f"dendrites_to_query:{dendrites_to_query}")
         return dendrites_to_query
 
     def update_weights(self, scores):

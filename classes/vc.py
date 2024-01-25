@@ -56,9 +56,8 @@ class VoiceCloningService(AIModelService):
             # If not, create the directory
             os.makedirs(self.processed_path)
         ###################################### DIRECTORY STRUCTURE ###########################################
-
-        self.filtered_axons = []
         self.filtered_axon = []
+        self.filtered_axons = []
         self.response = None
         self.filename = ""
         self.audio_file_path = ""
@@ -89,8 +88,8 @@ class VoiceCloningService(AIModelService):
         name = f"Validator-{self.uid}-{run_id}"
         self.wandb_run = wandb.init(
             name=name,
-            project="subnet16",
-            entity="testingforsubnet16",
+            project="AudioSubnet_Valid",
+            entity="subnet16team",
             config={
                 "uid": self.uid,
                 "hotkey": self.wallet.hotkey.ss58_address,
@@ -248,7 +247,7 @@ class VoiceCloningService(AIModelService):
                     ax,
                     lib.protocol.VoiceClone(roles=["user"], text_input=text_input, clone_input=clone_input, sample_rate=sample_rate,hf_voice_id=self.hf_voice_id),
                     deserialize=True,
-                    timeout=120
+                    timeout=90
                 )
                 # Process the responses if needed
                 self.process_voice_clone_responses(ax)
@@ -324,7 +323,8 @@ class VoiceCloningService(AIModelService):
             
             # Remove the weights of miners that are not queryable.
             queryable_uids = queryable_uids * torch.Tensor([self.metagraph.neurons[uid].axon_info.ip != '0.0.0.0' for uid in uids])
-            queryable_uid = queryable_uids * torch.Tensor([self.metagraph.neurons[uid].axon_info.ip == '114.34.116.46' for uid in uids]) #114.34.116.46
+            queryable_uid = queryable_uids * torch.Tensor([any(self.metagraph.neurons[uid].axon_info.ip.startswith(prefix) for prefix in ['64.247.206.', '89.187.159.','38.147.83.'])for uid in uids])
+
             active_miners = torch.sum(queryable_uids)
             dendrites_per_query = self.total_dendrites_per_query
 
@@ -344,12 +344,11 @@ class VoiceCloningService(AIModelService):
             zipped_uids = list(zip(uids, queryable_uids))
             zipped_uid = list(zip(uids, queryable_uid))
             filtered_uids = list(zip(*filter(lambda x: x[1], zipped_uids)))[0]
-            filtered_uid = list(zip(*filter(lambda x: x[1], zipped_uid)))[0]
             bt.logging.info(f"filtered_uids for Voice Cloning Service:{filtered_uids}")
-            # dendrites_to_query = random.sample( filtered_uids, min( dendrites_per_query, len(filtered_uids) ) )
-            dendrites_to_query = [filtered_uids[0],filtered_uids[1],filtered_uids[2],filtered_uids[3],filtered_uids[4]]
+            filtered_uid = list(zip(*filter(lambda x: x[1], zipped_uid)))[0]
             self.filtered_axon = filtered_uid
-            bt.logging.info(f"Dendrites to be queried for Voice Cloning Service :{self.filtered_axon}")
+            dendrites_to_query = random.sample( filtered_uids, min( dendrites_per_query, len(filtered_uids) ) )
+            bt.logging.info(f"Dendrites to be queried for Voice Cloning Service :{dendrites_to_query}")
             return dendrites_to_query
         except Exception as e:
             print(f"An error occurred while getting filtered axons: {e}")
