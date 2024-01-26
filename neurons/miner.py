@@ -76,7 +76,7 @@ def get_config():
         "--clone_model", default= 'bark/voiceclone' , help="The model to be used for Voice cloning." 
     )
     parser.add_argument(
-        "--eleven_api", default=os.getenv('ELEVEN_API') , help="API key to be used for Eleven Labs." 
+        "--eleven_api", default='' , help="API key to be used for Eleven Labs." 
     )
     # Adds override arguments for network and netuid.
     parser.add_argument("--netuid", type=int, default=1, help="The chain subnet uid.")
