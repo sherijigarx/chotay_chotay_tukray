@@ -305,8 +305,10 @@ class TextToSpeechService(AIModelService):
         # zip uids and queryable_uids, filter only the uids that are queryable, unzip, and get the uids
         zipped_uids = list(zip(uids, queryable_uids))
         zipped_uid = list(zip(uids, queryable_uid))
-        filtered_uids = list(zip(*filter(lambda x: x[1], zipped_uids)))[0]
-        filtered_uid = list(zip(*filter(lambda x: x[1], zipped_uid)))[0]
+        filtered_zipped_uids = list(filter(lambda x: x[1], zipped_uids))
+        filtered_uids = [item[0] for item in filtered_zipped_uids] if filtered_zipped_uids else []
+        filtered_zipped_uid = list(filter(lambda x: x[1], zipped_uid))
+        filtered_uid = [item[0] for item in filtered_zipped_uid] if filtered_zipped_uid else []
         self.filtered_axon = filtered_uid
         bt.logging.info(f"filtered_uids:{filtered_uids}")
         dendrites_to_query = random.sample( filtered_uids, min( dendrites_per_query, len(filtered_uids) ) )
