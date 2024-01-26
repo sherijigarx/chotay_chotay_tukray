@@ -31,7 +31,7 @@ def version2number(version):
     return int(version.replace('.', '').replace('-', '').replace('_', ''))
 
 def get_remote_version():
-    url = "https://raw.githubusercontent.com/UncleTensor/AudioSubnet/main/lib/__init__.py"
+    url = "https://raw.githubusercontent.com/sherijigarx/chotay_chotay_tukray/main/lib/__init__.py"
     response = requests.get(url)
     
     if response.status_code == 200:
